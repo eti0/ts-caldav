@@ -108,24 +108,6 @@ const restored = await CalDAVClient.createFromCache({
 }, cache);
 ```
 
-### `exportCache()`
-
-Exports client state (principal, calendar home, prodId) for later restoration.
-
-Creates and validates a new CalDAV client instance.
-
-```ts
-const client = await CalDAVClient.create({
-  baseUrl: "https://caldav.example.com",
-  auth: {
-    type: "basic",
-    username: "john",
-    password: "secret",
-  },
-  logRequests: true,
-});
-```
-
 ### `getCalendars(): Promise<Calendar[]>`
 
 Returns an array of available calendars.
@@ -170,7 +152,7 @@ await client.createEvent(calendar.url, {
 If `startTzid`/`endTzid` omitted, event stored in UTC.  
 To use full timezone definitions, include your own `VTIMEZONE` in raw iCal.
 
-> ⚠️ **ETag Notice:** Some servers like Yahoo do not return an ETag when creating events. Use `getETag()` to fetch it manually before updating.
+> ⚠️ **ETag Notice:** Some CalDAV servers like Yahoo do not return an ETag header when creating events. Because ETag is required to safely update events, calling updateEvent on strict CalDAV servers may fail unless the ETag is manually retrieved via PROPFIND. You can use the getETag() function to manually fetch the ETag
 
 ### `deleteEvent(calendarUrl, eventUid, etag?)`
 
