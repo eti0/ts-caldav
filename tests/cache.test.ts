@@ -15,7 +15,7 @@ describe("CalDAVClient Cache Operations", () => {
         username: process.env.CALDAV_USERNAME!,
         password: process.env.CALDAV_PASSWORD!,
       },
-      requestTimeout: 10000,
+      requestTimeout: 15000,
     });
 
     cache = client.exportCache();
@@ -34,7 +34,7 @@ describe("CalDAVClient Cache Operations", () => {
           username: process.env.CALDAV_USERNAME!,
           password: process.env.CALDAV_PASSWORD!,
         },
-        requestTimeout: 10000,
+        requestTimeout: 15000,
       },
       cache
     );

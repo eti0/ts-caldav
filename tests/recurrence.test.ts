@@ -20,7 +20,7 @@ describe("Recurring Event Handling", () => {
         username: process.env.CALDAV_USERNAME!,
         password: process.env.CALDAV_PASSWORD!,
       },
-      requestTimeout: 10000,
+      requestTimeout: 15000,
     });
 
     const calendars = await client.getCalendars();
