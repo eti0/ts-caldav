@@ -1,13 +1,27 @@
 # ts-caldav
 
+[![npm version](https://img.shields.io/npm/v/ts-caldav.svg)](https://www.npmjs.com/package/ts-caldav)
 [![Run Tests](https://github.com/KlautNet/ts-caldav/actions/workflows/test.yml/badge.svg)](https://github.com/KlautNet/ts-caldav/actions/workflows/test.yml)
-![npm version](https://img.shields.io/npm/v/ts-caldav.svg)
 
 > A lightweight, promise-based TypeScript CalDAV client for syncing calendar data in browser, Node.js, or React Native environments.
 
 **ts-caldav** helps you interact with CalDAV servers — allowing you to fetch calendars, manage events (including recurring events), and synchronize changes with minimal effort. Great for building calendar apps or integrations.
 
----
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Known Working Servers](#known-working-servers)
+- [API Documentation](#api-documentation)
+- [Timezone Support](#timezone-support)
+- [Recurrence Support](#recurrence-support)
+- [Auth Notes](#auth-notes)
+- [Example: Sync Local Calendar](#example-use-case-sync-local-calendar)
+- [Limitations](#limitations)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
@@ -18,8 +32,6 @@
 - Efficient sync with diff-based event updates
 - Built for TypeScript, with full type safety
 
----
-
 ## Installation
 
 ```bash
@@ -29,8 +41,6 @@ pnpm install ts-caldav
 # or
 yarn add ts-caldav
 ```
-
----
 
 ## Quick Start
 
@@ -53,11 +63,7 @@ const calendars = await client.getCalendars();
 const events = await client.getEvents(calendars[0].url);
 ```
 
----
-
-## Known Working CalDAV Servers
-
-Here are some server endpoints that **ts-caldav** has been tested with:
+## Known Working Servers
 
 | Provider      | Endpoint Example |
 |:--------------|:------------------|
@@ -67,8 +73,6 @@ Here are some server endpoints that **ts-caldav** has been tested with:
 | **GMX**       | `https://caldav.gmx.net` |
 
 > 💡 **Note:** Some servers may require enabling CalDAV support or generating app-specific passwords (especially iCloud and Fastmail).
-
----
 
 ## API Documentation
 
@@ -88,38 +92,59 @@ const client = await CalDAVClient.create({
 });
 ```
 
----
+### `CalDAVClient.createFromCache(options, cache)`
+
+Restores a client from cached state without re-fetching calendar home or validating credentials.
+
+```ts
+const cache = client.exportCache();
+const restored = await CalDAVClient.createFromCache({
+  baseUrl: "https://caldav.example.com",
+  auth: {
+    type: "basic",
+    username: "john",
+    password: "secret",
+  }
+}, cache);
+```
+
+### `exportCache()`
+
+Exports client state (principal, calendar home, prodId) for later restoration.
+
+Creates and validates a new CalDAV client instance.
+
+```ts
+const client = await CalDAVClient.create({
+  baseUrl: "https://caldav.example.com",
+  auth: {
+    type: "basic",
+    username: "john",
+    password: "secret",
+  },
+  logRequests: true,
+});
+```
 
 ### `getCalendars(): Promise<Calendar[]>`
 
-Returns an array of available calendars for the authenticated user.
-
----
+Returns an array of available calendars.
 
 ### `getEvents(calendarUrl: string, options?): Promise<Event[]>`
 
-Fetches events within a given time range (defaults to 3 weeks ahead if none provided).
-When all is true and no time range is provided the Client fetches all Events.
+Fetches events within a given time range (defaults to 3 weeks ahead). When `all` is true and no range is provided, fetches all events.
 
 ```ts
 const events = await client.getEvents(calendarUrl, {
   start: new Date(),
-  end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+  end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   all: false
 });
 ```
 
-Returned `Event` objects include `startTzid` and `endTzid` (if defined in the calendar).
-
----
-
 ### `createEvent(calendarUrl, eventData)`
 
-Creates a new calendar event. Supports:
-
-- Full-day events (`wholeDay: true`)
-- Recurring events (`recurrenceRule`)
-- Timezone-aware events (`startTzid`, `endTzid`)
+Supports full-day, recurring, and timezone-aware events.
 
 ```ts
 await client.createEvent(calendar.url, {
@@ -129,15 +154,8 @@ await client.createEvent(calendar.url, {
   startTzid: "Europe/Berlin",
   endTzid: "Europe/Berlin",
   alarms: [
-    {
-      action: "DISPLAY",
-      trigger: "-PT30M",
-      description: "Popup reminder",
-    },
-    {
-      action: "AUDIO",
-      trigger: "-PT15M",
-    },
+    { action: "DISPLAY", trigger: "-PT30M", description: "Popup reminder" },
+    { action: "AUDIO", trigger: "-PT15M" },
     {
       action: "EMAIL",
       trigger: "-PT10M",
@@ -149,29 +167,18 @@ await client.createEvent(calendar.url, {
 });
 ```
 
-If `startTzid` and `endTzid` are omitted, the event will be stored in UTC.
+If `startTzid`/`endTzid` omitted, event stored in UTC.  
+To use full timezone definitions, include your own `VTIMEZONE` in raw iCal.
 
-To use full timezone definitions (e.g., for legacy CalDAV servers), you may optionally include your own `VTIMEZONE` component via raw iCal data.
-
-> ⚠️ **ETag Notice**
-> Some CalDAV servers like Yahoo do not return an `ETag` header when creating events.
-> Because `ETag` is required to safely update events, calling `updateEvent` on strict CalDAV servers may fail unless the `ETag` is manually retrieved via `PROPFIND`.
->
-> You can use the getETag() function to manually fetch the ETag
-
----
+> ⚠️ **ETag Notice:** Some servers like Yahoo do not return an ETag when creating events. Use `getETag()` to fetch it manually before updating.
 
 ### `deleteEvent(calendarUrl, eventUid, etag?)`
 
-Deletes an event by UID. Optionally provide ETag for safe deletion.
-
----
+Delete by UID, optionally using ETag for safe deletion.
 
 ### `syncChanges(calendarUrl, previousCtag, localEventRefs)`
 
-Compares remote calendar state to local references using `getctag` and `etag`.
-
-Returns a structure with:
+Compares remote state using `getctag`/`etag` and returns:
 
 - `changed`
 - `newCtag`
@@ -179,19 +186,13 @@ Returns a structure with:
 - `updatedEvents`
 - `deletedEvents`
 
----
+### `getEventsByHref(calendarUrl, hrefs)`
 
-### `getEventsByHref(calendarUrl, hrefs: string[])`
+Fetch `.ics` data for specific events.
 
-Fetches full `.ics` data for specific event hrefs.
+### `getETag(href)`
 
----
-
-### `getETag(href: string): Promise<string>`
-
-Fetches the current `ETag` for a specific event.
-
-This is useful for servers (like Yahoo) that do not return the `ETag` after event creation. You can retrieve it manually using the event's `href` before performing an update or deletion that requires an `ETag`.
+Fetch the current ETag for an event.
 
 ```ts
 const etag = await client.getETag("/calendars/user/calendar-id/event-id.ics");
@@ -205,21 +206,50 @@ await client.updateEvent(calendarUrl, {
 });
 ```
 
-#### Parameters
+> ℹ️ Automatically strips weak validator prefixes (e.g., `W/"..."`).
 
-- `href`: `string` – The full CalDAV URL of the `.ics` event resource.
+## Todo API
 
-#### Returns
+### `getTodos(calendarUrl: string, options?): Promise<Todo[]>`
 
-- A `Promise<string>` resolving to the `ETag` value. Throws if the ETag is not found or the request fails.
+Fetches todos within a given range or all.
 
-> ℹ️ This method automatically strips weak validator prefixes (e.g., `W/"..."`) for safe use with `If-Match`.
+### `getTodosByHref(calendarUrl: string, hrefs: string[]): Promise<Todo[]>`
 
----
+Fetches full `.ics` data for specific todos.
+
+### `createTodo(calendarUrl: string, todoData)`
+
+Creates a new todo.
+
+```ts
+await client.createTodo(calendar.url, {
+  summary: "Buy groceries",
+  due: new Date("2025-08-12T18:00:00"),
+  alarms: [{ action: "DISPLAY", trigger: "-PT1H", description: "Reminder" }]
+});
+```
+
+### `updateTodo(calendarUrl: string, todo)`
+
+Updates an existing todo.
+
+### `deleteTodo(calendarUrl: string, todoUid, etag?)`
+
+Deletes a todo by UID.
+
+### `syncTodoChanges(calendarUrl, previousCtag, localTodoRefs)`
+
+Compares remote todo list state with local references using `getctag` and `etag`.
+Returns:
+
+- `changed`
+- `newCtag`
+- `newTodos`
+- `updatedTodos`
+- `deletedTodos`
 
 ## Timezone Support
-
-The library supports per-event timezones using `startTzid` and `endTzid` fields:
 
 ```ts
 await client.createEvent(calendar.url, {
@@ -231,26 +261,11 @@ await client.createEvent(calendar.url, {
 });
 ```
 
-When fetching events, `startTzid` and `endTzid` will be parsed (if present in the `VEVENT`) so that you can:
-
-- Correctly interpret time in the user's zone
-- Normalize across time zones for scheduling
-
-If no `TZID` is set, dates are treated as UTC.
-
----
+When fetching, `startTzid`/`endTzid` will be parsed for correct interpretation and normalization.
 
 ## Recurrence Support
 
-Supports the following recurrence rule fields:
-
-- `freq`: "DAILY", "WEEKLY", "MONTHLY", "YEARLY"
-- `interval`: number of frequency intervals between occurrences
-- `count`: number of total occurrences
-- `until`: date until which the event recurs
-- `byday`, `bymonthday`, `bymonth`
-
-Example:
+Supports `freq`, `interval`, `count`, `until`, `byday`, `bymonthday`, `bymonth`.
 
 ```ts
 recurrenceRule: {
@@ -261,39 +276,29 @@ recurrenceRule: {
 }
 ```
 
----
-
 ## Auth Notes
 
-- Supports Basic Auth and OAuth2
-- Compatible with most CalDAV servers: Google, iCloud, Fastmail, Nextcloud, Radicale
-
----
+- Basic Auth & OAuth2 supported
+- Works with Google, iCloud, Fastmail, Nextcloud, Radicale
 
 ## Example Use Case: Sync Local Calendar
 
 ```ts
 const result = await client.syncChanges(calendar.url, lastCtag, localEventRefs);
-
 if (result.changed) {
   const newEvents = await client.getEventsByHref(calendar.url, [
     ...result.newEvents,
     ...result.updatedEvents,
   ]);
-
   updateLocalDatabase(newEvents, result.deletedEvents);
   saveNewCtag(result.newCtag);
 }
 ```
 
----
-
 ## Limitations
 
-- Does not support WebDAV `sync-token` (use `getctag` diffing instead)
-- Limited to `VEVENT` components only
-
----
+- No WebDAV sync-token (uses getctag diffing)
+- Limited to VEVENT and VTODO components
 
 ## Development
 
@@ -304,21 +309,9 @@ npm install
 npm run build
 ```
 
----
-
 ## Contributing
 
-Contributions are very welcome! Take a look at [CONTRIBUTING](./contributing.md) to get started.
-
----
-
-## Roadmap
-
-- [x] Basic CalDAV client with calendar and event support
-- [x] Recurring event support (RRULE)
-- [x] Timezone-aware event parsing and creation
-- [ ] WebDAV sync-token support
-- [ ] VTODO and VJURNAL support
+Contributions welcome! See [CONTRIBUTING](./contributing.md).
 
 ## License
 
