@@ -16,7 +16,7 @@ describe("Google CalDAV Sync Tests (OAuth)", () => {
         type: "oauth",
         accessToken: process.env.ACCESS_TOKEN!,
       },
-      requestTimeout: 15000,
+      requestTimeout: 30000,
     });
 
     const calendars = await client.getCalendars();

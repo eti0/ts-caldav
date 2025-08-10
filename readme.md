@@ -282,6 +282,11 @@ if (result.changed) {
 - No WebDAV sync-token (uses getctag diffing)
 - Limited to VEVENT and VTODO components
 
+## Roadmap
+
+- Mock requests to prevent flaiky tests
+- VCARD and VJOURNAL support
+
 ## Development
 
 ```bash

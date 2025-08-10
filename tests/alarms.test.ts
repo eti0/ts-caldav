@@ -16,7 +16,7 @@ describe("Alarm Handling", () => {
         username: process.env.CALDAV_USERNAME!,
         password: process.env.CALDAV_PASSWORD!,
       },
-      requestTimeout: 15000,
+      requestTimeout: 30000,
     });
 
     const calendars = await client.getCalendars();
