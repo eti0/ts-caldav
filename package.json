@@ -1,47 +1,48 @@
 {
-  "name": "ts-caldav",
-  "version": "0.2.5",
-  "description": "A CalDAV client written in TypeScript",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "jest",
-    "lint": "eslint",
-    "build": "tsc"
-  },
-  "keywords": [
-    "caldav",
-    "typescript",
-    "calendar",
-    "client",
-    "caldav-client",
-    "ts-caldav",
-    "react-native",
-    "nodejs"
-  ],
-  "author": "KlautNet",
-  "license": "ISC",
-  "dependencies": {
-    "axios": "^1.8.2",
-    "base-64": "^1.0.0",
-    "dotenv": "^16.4.7",
-    "fast-xml-parser": "^4.5.1",
-    "ical.js": "^2.1.0",
-    "uuid": "^11.1.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.16.0",
-    "@types/axios-mock-adapter": "^1.9.0",
-    "@types/base-64": "^1.0.2",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.2",
-    "axios-mock-adapter": "^2.1.0",
-    "eslint": "^9.16.0",
-    "globals": "^15.13.0",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.18.0"
-  }
+	"name": "ts-caldav",
+	"version": "0.2.5",
+	"description": "A CalDAV client written in TypeScript",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"test": "jest",
+		"lint": "eslint",
+		"build": "tsc",
+		"prepare": "npm run build"
+	},
+	"keywords": [
+		"caldav",
+		"typescript",
+		"calendar",
+		"client",
+		"caldav-client",
+		"ts-caldav",
+		"react-native",
+		"nodejs"
+	],
+	"author": "KlautNet",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^1.8.2",
+		"base-64": "^1.0.0",
+		"dotenv": "^16.4.7",
+		"fast-xml-parser": "^4.5.1",
+		"ical.js": "^2.1.0",
+		"uuid": "^11.1.0"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.16.0",
+		"@types/axios-mock-adapter": "^1.9.0",
+		"@types/base-64": "^1.0.2",
+		"@types/jest": "^29.5.14",
+		"@types/node": "^22.10.2",
+		"axios-mock-adapter": "^2.1.0",
+		"eslint": "^9.16.0",
+		"globals": "^15.13.0",
+		"jest": "^29.7.0",
+		"ts-jest": "^29.2.5",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.7.2",
+		"typescript-eslint": "^8.18.0"
+	}
 }
