@@ -266,15 +266,39 @@ class CalDAVClient {
             const start = ical_js_1.default.Time.fromJSDate(event.start, true);
             const end = ical_js_1.default.Time.fromJSDate(event.end, true);
             if (event.startTzid) {
-                const prop = vevent.addPropertyWithValue("dtstart", start);
-                prop.setParameter("tzid", event.startTzid);
+                try {
+                    const tz = ical_js_1.default.TimezoneService.get(event.startTzid);
+                    if (tz) {
+                        const localStart = start.convertToZone(tz);
+                        const prop = vevent.addPropertyWithValue("dtstart", localStart);
+                        prop.setParameter("tzid", event.startTzid);
+                    }
+                    else {
+                        e.startDate = start;
+                    }
+                }
+                catch {
+                    e.startDate = start;
+                }
             }
             else {
                 e.startDate = start;
             }
             if (event.endTzid) {
-                const prop = vevent.addPropertyWithValue("dtend", end);
-                prop.setParameter("tzid", event.endTzid);
+                try {
+                    const tz = ical_js_1.default.TimezoneService.get(event.endTzid);
+                    if (tz) {
+                        const localEnd = end.convertToZone(tz);
+                        const prop = vevent.addPropertyWithValue("dtend", localEnd);
+                        prop.setParameter("tzid", event.endTzid);
+                    }
+                    else {
+                        e.endDate = end;
+                    }
+                }
+                catch {
+                    e.endDate = end;
+                }
             }
             else {
                 e.endDate = end;
